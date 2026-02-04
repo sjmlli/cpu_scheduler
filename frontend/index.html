@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>CPU Scheduling Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-slate-950 text-slate-100">
+    <div class="max-w-6xl mx-auto p-6 space-y-6">
+      <header class="flex items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-bold">CPU Scheduling Visualizer</h1>
+          <p class="text-slate-300 text-sm">Backend: FastAPI • Endpoint: <span class="font-mono">POST /execute</span></p>
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="text-sm text-slate-300">API Base</label>
+          <input id="apiBase" class="w-64 px-3 py-2 rounded bg-slate-900 border border-slate-700 font-mono text-sm" value="http://localhost:8000" />
+        </div>
+      </header>
+
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="lg:col-span-2 bg-slate-900/60 border border-slate-800 rounded p-4 space-y-4">
+          <div class="flex flex-wrap items-end gap-3">
+            <div class="flex-1 min-w-[220px]">
+              <label class="text-sm text-slate-300">Algorithm</label>
+              <select id="algorithm" class="w-full mt-1 px-3 py-2 rounded bg-slate-900 border border-slate-700">
+                <option>FCFS</option>
+                <option>RR</option>
+                <option>SRTF</option>
+                <option>HRRN</option>
+                <option>SJF</option>
+                <option>SPN</option>
+                <option>MLQ</option>
+                <option>MLFQ</option>
+              </select>
+            </div>
+            <div class="w-40">
+              <label class="text-sm text-slate-300">Context Switch</label>
+              <input id="contextSwitch" type="number" min="0" value="0" class="w-full mt-1 px-3 py-2 rounded bg-slate-900 border border-slate-700" />
+            </div>
+            <div class="w-40">
+              <label class="text-sm text-slate-300">Time Slice</label>
+              <input id="timeSlice" type="number" min="1" value="4" class="w-full mt-1 px-3 py-2 rounded bg-slate-900 border border-slate-700" />
+            </div>
+            <button id="executeBtn" class="px-4 py-2 rounded bg-emerald-600 hover:bg-emerald-500 font-semibold">Execute</button>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between">
+              <h2 class="font-semibold">Processes</h2>
+              <div class="flex items-center gap-2">
+                <button id="addRow" class="px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-sm">+ Add</button>
+                <button id="loadSample" class="px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-sm">Load Sample</button>
+              </div>
+            </div>
+            <div class="overflow-x-auto mt-2">
+              <table class="w-full text-sm">
+                <thead class="text-slate-300">
+                  <tr>
+                    <th class="text-right py-2">PID</th>
+                    <th class="text-right py-2">Arrival</th>
+                    <th class="text-right py-2">Burst</th>
+                    <th class="text-right py-2">Priority (MLQ)</th>
+                    <th class="py-2"></th>
+                  </tr>
+                </thead>
+                <tbody id="procBody" class="divide-y divide-slate-800"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between">
+              <h2 class="font-semibold">Config (JSON)</h2>
+              <span class="text-xs text-slate-400">برای MLQ/MLFQ استفاده می‌شود</span>
+            </div>
+            <textarea id="config" rows="6" class="w-full mt-2 px-3 py-2 rounded bg-slate-900 border border-slate-700 font-mono text-xs"
+              placeholder='مثال MLQ:
+{ "queues": [
+  {"algorithm":"RR","time_slice":4},
+  {"algorithm":"RR","time_slice":4},
+  {"algorithm":"FCFS"},
+  {"algorithm":"FCFS"}
+], "priority_mapping":"1-4" }'></textarea>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/60 border border-slate-800 rounded p-4 space-y-4">
+          <h2 class="font-semibold">Compare Algorithms</h2>
+          <div id="compareList" class="grid grid-cols-2 gap-2 text-sm"></div>
+          <button id="compareBtn" class="w-full px-4 py-2 rounded bg-indigo-600 hover:bg-indigo-500 font-semibold">Compare</button>
+          <div id="compareOut" class="text-sm text-slate-200"></div>
+        </div>
+      </section>
+
+      <section class="bg-slate-900/60 border border-slate-800 rounded p-4 space-y-4">
+        <h2 class="font-semibold">Gantt Chart</h2>
+        <div id="warnings" class="text-amber-300 text-sm"></div>
+        <div id="gantt" class="w-full overflow-x-auto">
+          <div id="ganttBar" class="flex items-stretch gap-0"></div>
+          <div id="ganttAxis" class="flex items-center text-xs text-slate-400 mt-2"></div>
+        </div>
+      </section>
+
+      <section class="bg-slate-900/60 border border-slate-800 rounded p-4 space-y-4">
+        <h2 class="font-semibold">Metrics</h2>
+        <div id="averages" class="text-sm text-slate-200"></div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="text-slate-300">
+              <tr>
+                <th class="text-right py-2">PID</th>
+                <th class="text-right py-2">WT</th>
+                <th class="text-right py-2">TAT</th>
+                <th class="text-right py-2">RT</th>
+                <th class="text-right py-2">CT</th>
+              </tr>
+            </thead>
+            <tbody id="metricsBody" class="divide-y divide-slate-800"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
