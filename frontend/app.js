@@ -2,12 +2,6 @@ const $ = (id) => document.getElementById(id);
 
 const ALGORITHMS = ["FCFS", "RR", "SRTF", "HRRN", "SJF", "SPN", "MLQ", "MLFQ"];
 
-function hslFromString(str) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
-  const hue = hash % 360;
-  return `hsl(${hue} 70% 40%)`;
-}
 
 function addRow({ pid = "P1", arrival = 0, burst = 1, priority = "" } = {}) {
   const tr = document.createElement("tr");
