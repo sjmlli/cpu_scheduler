@@ -1,6 +1,7 @@
 const $ = (id) => document.getElementById(id);
 
 const ALGORITHMS = ["FCFS", "RR", "SRTF", "HRRN", "SJF", "SPN", "MLQ", "MLFQ"];
+
 ‍‍‍‍‍function hslFromString(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
